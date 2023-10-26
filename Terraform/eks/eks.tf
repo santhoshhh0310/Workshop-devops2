@@ -1,5 +1,5 @@
 resource "aws_iam_role" "master" {
-  name = "ed-eks-master"
+  name = "ed-eks-master1"
 
   assume_role_policy = <<POLICY
 {
@@ -33,7 +33,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
 }
 
 resource "aws_iam_role" "worker" {
-  name = "ed-eks-worker"
+  name = "ed-eks-worker1"
 
   assume_role_policy = <<POLICY
 {
@@ -52,7 +52,7 @@ POLICY
 }
 
 resource "aws_iam_policy" "autoscaler" {
-  name   = "ed-eks-autoscaler-policy"
+  name   = "ed-eks-autoscaler-policy1"
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -118,13 +118,13 @@ resource "aws_iam_instance_profile" "worker" {
 
 ###############################################################################################################
 resource "aws_eks_cluster" "eks" {
-  name = "namg-eks-01"
+  name     = "namg-eks-01"
   role_arn = aws_iam_role.master.arn
 
   vpc_config {
-    subnet_ids = [var.subnet_ids[0],var.subnet_ids[1]]
+    subnet_ids = [var.subnet_ids[0], var.subnet_ids[1]]
   }
-  
+
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.AmazonEKSServicePolicy,
@@ -141,17 +141,17 @@ resource "aws_eks_node_group" "backend" {
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = "dev"
   node_role_arn   = aws_iam_role.worker.arn
-  subnet_ids = [var.subnet_ids[0],var.subnet_ids[1]]
-  capacity_type = "ON_DEMAND"
-  disk_size = "20"
-  instance_types = ["t2.small"]
+  subnet_ids      = [var.subnet_ids[0], var.subnet_ids[1]]
+  capacity_type   = "ON_DEMAND"
+  disk_size       = "20"
+  instance_types  = ["t2.small"]
   remote_access {
-    ec2_ssh_key = "linux-KP"
+    ec2_ssh_key               = "ECS-keypair"
     source_security_group_ids = [var.sg_ids]
-  } 
-  
-  labels =  tomap({env = "dev"})
-  
+  }
+
+  labels = tomap({ env = "dev" })
+
   scaling_config {
     desired_size = 2
     max_size     = 3
