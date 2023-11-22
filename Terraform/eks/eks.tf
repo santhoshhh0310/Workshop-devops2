@@ -118,7 +118,7 @@ resource "aws_iam_instance_profile" "worker" {
 
 ###############################################################################################################
 resource "aws_eks_cluster" "eks" {
-  name     = "namg-eks-02"
+  name     = "namg-eks-01"
   role_arn = aws_iam_role.master.arn
 
   vpc_config {
@@ -139,18 +139,18 @@ resource "aws_eks_cluster" "eks" {
 
 resource "aws_eks_node_group" "backend" {
   cluster_name    = aws_eks_cluster.eks.name
-  node_group_name = "dev"
+  node_group_name = "main"
   node_role_arn   = aws_iam_role.worker.arn
   subnet_ids      = [var.subnet_ids[0], var.subnet_ids[1]]
   capacity_type   = "ON_DEMAND"
   disk_size       = "20"
   instance_types  = ["t2.small"]
   remote_access {
-    ec2_ssh_key               = "ECS-keypair"
+    ec2_ssh_key               = "CICD"
     source_security_group_ids = [var.sg_ids]
   }
 
-  labels = tomap({ env = "dev" })
+  labels = tomap({ env = "main" })
 
   scaling_config {
     desired_size = 2
